@@ -5,6 +5,7 @@ from typing import List
 from statistics import mean, median, stdev
 from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
+from dotenv import load_dotenv
 from chainforge.providers.dalai import call_dalai
 from chainforge.providers import ProviderRegistry
 import requests as py_requests
@@ -13,6 +14,9 @@ import requests as py_requests
     SETUP AND GLOBALS
     =================
 """
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Setup Flask app to serve static version of React front-end
 HOSTNAME = "localhost"
@@ -474,6 +478,7 @@ def fetchEnvironAPIKeys():
         'TOGETHER_API_KEY': 'Together',
     }
     d = { alias: os.environ.get(key) for key, alias in keymap.items() }
+    
     ret = jsonify(d)
     ret.headers.add('Access-Control-Allow-Origin', '*')
     return ret
