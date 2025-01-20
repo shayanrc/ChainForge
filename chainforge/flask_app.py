@@ -479,7 +479,7 @@ def fetchEnvironAPIKeys():
         'DEEPSEEK_API_KEY': 'DeepSeek',
     }
     d = { alias: os.environ.get(key) for key, alias in keymap.items() }
-    print(d)
+    
     ret = jsonify(d)
     ret.headers.add('Access-Control-Allow-Origin', '*')
     return ret
