@@ -185,6 +185,8 @@ export enum NativeLLM {
   Together_Undi95_Toppy_M_7B = "together/Undi95/Toppy-M-7B",
   Together_WizardLM_WizardLM_v1_2_13B = "together/WizardLM/WizardLM-13B-V1.2",
   Together_upstage_Upstage_SOLAR_Instruct_v1_11B = "together/upstage/SOLAR-10.7B-Instruct-v1.0",
+  Deepseek_Chat = "deepseek-chat",
+  Deepseek_Coder = "deepseek-coder",
 }
 
 export type LLM = string | NativeLLM;
@@ -212,6 +214,7 @@ export enum LLMProvider {
   Ollama = "ollama",
   Bedrock = "bedrock",
   Together = "together",
+  Deepseek = "deepseek",
   Custom = "__custom",
 }
 
@@ -233,6 +236,7 @@ export function getProvider(llm: LLM): LLMProvider | undefined {
   else if (llm_name?.startsWith("Ollama")) return LLMProvider.Ollama;
   else if (llm_name?.startsWith("Bedrock")) return LLMProvider.Bedrock;
   else if (llm_name?.startsWith("Together")) return LLMProvider.Together;
+  else if (llm_name?.startsWith("Deepseek")) return LLMProvider.Deepseek;
   else if (llm.toString().startsWith("__custom/")) return LLMProvider.Custom;
 
   return undefined;
@@ -283,6 +287,8 @@ export const RATE_LIMIT_BY_MODEL: { [key in LLM]?: number } = {
   [NativeLLM.Bedrock_Mistral_Mixtral]: 400, // 400 RPM
   [NativeLLM.Bedrock_Mistral_Mistral_Large]: 400, // 400 RPM
   [NativeLLM.Bedrock_Mistral_Mistral]: 800, // 800 RPM
+  [NativeLLM.Deepseek_Chat]: 100,    // Conservative estimate
+  [NativeLLM.Deepseek_Coder]: 100,   // Conservative estimate
 };
 
 export const RATE_LIMIT_BY_PROVIDER: { [key in LLMProvider]?: number } = {

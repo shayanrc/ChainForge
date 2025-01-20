@@ -2343,6 +2343,95 @@ BedrockLlama3Settings.uiSchema.model = {
   "ui:help": "Defaults to Llama3Instruct8b",
 };
 
+const DeepSeekSettings: ModelSettingsDict = {
+  fullName: "DeepSeek Models",
+  schema: {
+    type: "object",
+    required: ["shortname"],
+    properties: {
+      shortname: {
+        type: "string",
+        title: "Nickname",
+        description: "Unique identifier to appear in ChainForge. Keep it short.",
+        default: "DeepSeek",
+      },
+      model: {
+        type: "string",
+        title: "Model Version",
+        description: "Select a DeepSeek model to query.",
+        enum: [
+          NativeLLM.Deepseek_Chat,
+          NativeLLM.Deepseek_Coder,
+        ],
+        default: NativeLLM.Deepseek_Chat,
+      },
+      temperature: {
+        type: "number",
+        title: "temperature",
+        description: "Controls the randomness of the response.",
+        default: 0.7,
+        minimum: 0,
+        maximum: 1,
+        multipleOf: 0.01,
+      },
+      max_tokens: {
+        type: "integer",
+        title: "max_tokens",
+        description: "The maximum number of tokens to generate.",
+        default: 1024,
+        minimum: 1,
+      },
+      top_p: {
+        type: "number",
+        title: "top_p",
+        description: "Controls diversity via nucleus sampling.",
+        default: 0.7,
+        minimum: 0,
+        maximum: 1,
+        multipleOf: 0.01,
+      },
+      stop_sequences: {
+        type: "string",
+        title: "stop_sequences",
+        description: 'Sequences where the API will stop generating further tokens. Enclose stop sequences in double-quotes "" and use whitespace to separate them.',
+        default: "",
+      },
+    },
+  },
+  uiSchema: {
+    "ui:submitButtonOptions": UI_SUBMIT_BUTTON_SPEC,
+    shortname: {
+      "ui:autofocus": true,
+    },
+    model: {
+      "ui:help": "Defaults to DeepSeek Chat.",
+    },
+    temperature: {
+      "ui:help": "Defaults to 0.7.",
+      "ui:widget": "range",
+    },
+    max_tokens: {
+      "ui:help": "Defaults to 1024.",
+    },
+    top_p: {
+      "ui:help": "Defaults to 0.7.",
+      "ui:widget": "range",
+    },
+    stop_sequences: {
+      "ui:widget": "textarea",
+      "ui:help": "Defaults to no sequence",
+    },
+  },
+  postprocessors: {
+    stop_sequences: (str) => {
+      if (typeof str !== "string" || str.trim().length === 0) return [];
+      return str
+        .match(/"((?:[^"\\]|\\.)*)"/g)
+        ?.map((s) => s.substring(1, s.length - 1));
+    },
+  },
+};
+
 // A lookup table indexed by base_model.
 export const ModelSettings: Dict<ModelSettingsDict> = {
   "gpt-3.5-turbo": ChatGPTSettings,
@@ -2364,6 +2453,7 @@ export const ModelSettings: Dict<ModelSettingsDict> = {
   "br.meta.llama2": BedrockLlama2ChatSettings,
   "br.meta.llama3": BedrockLlama3Settings,
   together: TogetherChatSettings,
+  deepseek: DeepSeekSettings, // Add DeepSeek settings
 };
 
 export function getSettingsSchemaForLLM(
@@ -2383,6 +2473,7 @@ export function getSettingsSchemaForLLM(
     [LLMProvider.Aleph_Alpha]: AlephAlphaLuminousSettings,
     [LLMProvider.Ollama]: OllamaSettings,
     [LLMProvider.Together]: TogetherChatSettings,
+    [LLMProvider.Deepseek]: DeepSeekSettings,
   };
 
   if (llm_provider === LLMProvider.Custom) return ModelSettings[llm_name];

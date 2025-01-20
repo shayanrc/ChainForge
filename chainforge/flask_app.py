@@ -476,9 +476,10 @@ def fetchEnvironAPIKeys():
         'AWS_REGION': 'AWS_Region', 
         'AWS_SESSION_TOKEN': 'AWS_Session_Token',
         'TOGETHER_API_KEY': 'Together',
+        'DEEPSEEK_API_KEY': 'DeepSeek',
     }
     d = { alias: os.environ.get(key) for key, alias in keymap.items() }
-    
+    print(d)
     ret = jsonify(d)
     ret.headers.add('Access-Control-Allow-Origin', '*')
     return ret

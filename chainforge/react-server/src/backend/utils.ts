@@ -156,6 +156,7 @@ let AWS_SECRET_ACCESS_KEY = get_environ("AWS_SECRET_ACCESS_KEY");
 let AWS_SESSION_TOKEN = get_environ("AWS_SESSION_TOKEN");
 let AWS_REGION = get_environ("AWS_REGION");
 let TOGETHER_API_KEY = get_environ("TOGETHER_API_KEY");
+let DEEPSEEK_API_KEY = get_environ("DEEPSEEK_API_KEY");
 
 /**
  * Sets the local API keys for the revelant LLM API(s).
@@ -188,6 +189,7 @@ export function set_api_keys(api_keys: Dict<string>): void {
     AWS_SESSION_TOKEN = api_keys.AWS_Session_Token;
   if (key_is_present("AWS_Region")) AWS_REGION = api_keys.AWS_Region;
   if (key_is_present("Together")) TOGETHER_API_KEY = api_keys.Together;
+  if (key_is_present("DeepSeek")) DEEPSEEK_API_KEY = api_keys.DeepSeek;
 }
 
 export function get_azure_openai_api_keys(): [
@@ -1604,6 +1606,7 @@ export async function call_llm(
   else if (llm_provider === LLMProvider.Custom) call_api = call_custom_provider;
   else if (llm_provider === LLMProvider.Bedrock) call_api = call_bedrock;
   else if (llm_provider === LLMProvider.Together) call_api = call_together;
+  else if (llm_provider === LLMProvider.Deepseek) call_api = call_deepseek;
   if (call_api === undefined)
     throw new Error(
       `Adapter for Language model ${llm} and ${llm_provider} not found`,
@@ -1823,6 +1826,8 @@ export function extract_responses(
       return response as Array<string>;
     case LLMProvider.Together:
       return _extract_openai_responses(response as Dict[]);
+    case LLMProvider.Deepseek:
+      return _extract_deepseek_responses(response as Dict);
     default:
       if (
         Array.isArray(response) &&
@@ -2340,3 +2345,43 @@ export const compressBase64Image = (b64: string): Promise<string> => {
     )
     .then((compressedBlob) => blobToBase64(compressedBlob as Blob));
 };
+
+export async function call_deepseek(
+  prompt: string,
+  model: LLM,
+  n = 1,
+  temperature = 1.0,
+  params?: Dict,
+  should_cancel?: () => boolean,
+): Promise<[Dict, Dict]> {
+  if (!DEEPSEEK_API_KEY)
+    throw new Error(
+      "Could not find a DeepSeek API Key to use. Double-check that your key is set in Settings or in your local environment.",
+    );
+
+  const headers = {
+    "Content-Type": "application/json",
+    "Authorization": `Bearer ${DEEPSEEK_API_KEY}`,
+  };
+
+  const query: Dict = {
+    model: model.toString(),
+    messages: [{ role: "user", content: prompt }],
+    temperature,
+    n,
+    ...params,
+  };
+
+  const response = await route_fetch(
+    "https://api.deepseek.com/v1/chat/completions",
+    "POST",
+    headers,
+    query,
+  );
+
+  return [query, response];
+}
+
+function _extract_deepseek_responses(response: Dict): Array<string> {
+  return response.choices.map((choice: Dict) => choice.message.content);
+}
