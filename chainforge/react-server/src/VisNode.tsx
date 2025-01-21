@@ -150,6 +150,7 @@ const VisNode: React.FC<VisNodeProps> = ({ data, id }) => {
   const [responses, setResponses] = useState<LLMResponse[]>([]);
   const [status, setStatus] = useState<Status>(Status.NONE);
   const [placeholderText, setPlaceholderText] = useState(<></>);
+  const [isPlotMounted, setIsPlotMounted] = useState(false);
 
   const [plotLegend, setPlotLegend] = useState<React.ReactNode>(null);
   const [selectedLegendItems, setSelectedLegendItems] = useState<
@@ -955,30 +956,32 @@ const VisNode: React.FC<VisNodeProps> = ({ data, id }) => {
   // Resizing the plot when div is resized:
   const setPlotDivRef = useCallback(
     (elem: HTMLDivElement) => {
-      // To listen for resize events of the textarea, we need to use a ResizeObserver.
-      // We initialize the ResizeObserver only once, when the 'ref' is first set, and only on the div wrapping the Plotly vis.
-      if (!plotDivRef.current && window.ResizeObserver) {
-        const observer = new window.ResizeObserver(() => {
-          if (
-            !plotlyRef ||
-            !plotlyRef.current ||
-            // @ts-expect-error resizeHandler is a private property we access to force a redraw.
-            !plotlyRef.current.resizeHandler ||
-            !plotlySpec ||
-            plotlySpec.length === 0
-          )
-            return;
-          // The below calls Plotly.Plots.resize() on the specific element
-          // @ts-expect-error resizeHandler is a private property we access to force a redraw.
-          plotlyRef.current.resizeHandler();
-        });
-
-        observer.observe(elem);
-      }
       plotDivRef.current = elem;
     },
-    [plotDivRef, plotlySpec],
+    [plotDivRef],
   );
+
+  const [plotDimensions, setPlotDimensions] = useState({ width: 0, height: 300 });
+
+  // Handle resize observer setup and cleanup
+  useEffect(() => {
+    if (!plotDivRef.current || !window.ResizeObserver) return;
+
+    const observer = new window.ResizeObserver(() => {
+      if (!plotDivRef.current) return;
+      
+      setPlotDimensions({
+        width: plotDivRef.current.clientWidth,
+        height: Math.max(plotDivRef.current.clientHeight, 300)
+      });
+    });
+
+    observer.observe(plotDivRef.current);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [plotDivRef.current]);
 
   return (
     <BaseNode classNames="vis-node" nodeId={id}>
@@ -1076,16 +1079,29 @@ const VisNode: React.FC<VisNodeProps> = ({ data, id }) => {
         style={{ minWidth: "150px", minHeight: "100px" }}
       >
         {plotlySpec && plotlySpec.length > 0 ? <></> : placeholderText}
-        <Plot
-          ref={plotlyRef}
-          data={plotlySpec}
-          layout={plotlyLayout}
-          useResizeHandler={true}
-          className="plotly-vis"
-          style={{
-            display: plotlySpec && plotlySpec.length > 0 ? "block" : "none",
-          }}
-        />
+        {plotDivRef.current && (
+          <Plot
+            ref={plotlyRef}
+            data={plotlySpec}
+            layout={{
+              ...plotlyLayout,
+              autosize: false,
+              width: plotDimensions.width,
+              height: plotDimensions.height
+            }}
+            useResizeHandler={false}
+            className="plotly-vis"
+            style={{
+              display: plotlySpec && plotlySpec.length > 0 ? "block" : "none",
+              width: "100%",
+              height: "100%"
+            }}
+            config={{
+              responsive: false,
+              displayModeBar: false
+            }}
+          />
+        )}
         {plotLegend ?? <></>}
       </div>
       <Handle
