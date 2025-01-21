@@ -2371,7 +2371,7 @@ const DeepSeekSettings: ModelSettingsDict = {
         description: "Controls the randomness of the response.",
         default: 0.7,
         minimum: 0,
-        maximum: 1,
+        maximum: 2,
         multipleOf: 0.01,
       },
       max_tokens: {
@@ -2385,17 +2385,59 @@ const DeepSeekSettings: ModelSettingsDict = {
         type: "number",
         title: "top_p",
         description: "Controls diversity via nucleus sampling.",
-        default: 0.7,
+        default: 1,
         minimum: 0,
         maximum: 1,
         multipleOf: 0.01,
       },
-      stop_sequences: {
+      presence_penalty: {
+        type: "number",
+        title: "presence_penalty",
+        description: "Penalizes new tokens based on whether they appear in the text so far.",
+        default: 0,
+        minimum: -2.0,
+        maximum: 2.0,
+        multipleOf: 0.01,
+      },
+      frequency_penalty: {
+        type: "number",
+        title: "frequency_penalty",
+        description: "Penalizes new tokens based on their frequency in the text so far.",
+        default: 0,
+        minimum: -2.0,
+        maximum: 2.0,
+        multipleOf: 0.01,
+      },
+      stop: {
         type: "string",
-        title: "stop_sequences",
+        title: "Stop Sequences",
         description: 'Sequences where the API will stop generating further tokens. Enclose stop sequences in double-quotes "" and use whitespace to separate them.',
         default: "",
       },
+      system_msg: {
+        type: "string",
+        title: "System Message",
+        description: "Optional system message to set the behavior of the assistant.",
+        default: "You are a helpful assistant.",
+      },
+      response_format: {
+        type: "string",
+        title: "Response Format",
+        description: "The format of the response. Use 'text' for regular responses, 'json_object' for JSON, or provide a JSON schema for structured output.",
+        default: "text",
+      },
+      seed: {
+        type: "integer",
+        title: "Random Seed",
+        description: "If specified, the system will make a best effort to sample deterministically.",
+        default: 0,
+      },
+      tools: {
+        type: "string",
+        title: "Tools",
+        description: "A JSON array of function definitions the model may call.",
+        default: "[]",
+      }
     },
   },
   uiSchema: {
@@ -2408,28 +2450,48 @@ const DeepSeekSettings: ModelSettingsDict = {
     },
     temperature: {
       "ui:help": "Defaults to 0.7.",
-      "ui:widget": "range",
     },
-    max_tokens: {
-      "ui:help": "Defaults to 1024.",
-    },
-    top_p: {
-      "ui:help": "Defaults to 0.7.",
-      "ui:widget": "range",
-    },
-    stop_sequences: {
+    stop: {
+      "ui:help": "Enter stop sequences enclosed in quotes, separated by spaces.",
       "ui:widget": "textarea",
-      "ui:help": "Defaults to no sequence",
     },
+    system_msg: {
+      "ui:widget": "textarea",
+      "ui:help": "Optional message to control the assistant's behavior.",
+    },
+    response_format: {
+      "ui:help": "Format can be 'text', 'json_object', or a JSON schema for structured output.",
+    },
+    tools: {
+      "ui:help": "JSON array of function definitions the model may call.",
+      "ui:widget": "textarea",
+    }
   },
   postprocessors: {
-    stop_sequences: (str) => {
-      if (typeof str !== "string" || str.trim().length === 0) return [];
+    stop: (str) => {
+      if (typeof str !== "string") return str;
+      if (str.trim().length === 0) return [];
       return str
         .match(/"((?:[^"\\]|\\.)*)"/g)
         ?.map((s) => s.substring(1, s.length - 1));
     },
-  },
+    response_format: (str) => {
+      if (typeof str !== "string") return str;
+      if (str.trim().length === 0) return "text";
+      if (str === "text" || str === "json_object") return { type: str };
+      return { type: "json_schema", json_schema: JSON.parse(str) };
+    },
+    tools: (str) => {
+      if (typeof str !== "string") return str;
+      if (str.trim().length === 0) return [];
+      try {
+        return JSON.parse(str);
+      } catch (e) {
+        console.warn("Failed to parse tools JSON:", e);
+        return [];
+      }
+    }
+  }
 };
 
 // A lookup table indexed by base_model.

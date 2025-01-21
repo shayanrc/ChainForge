@@ -2364,24 +2364,75 @@ export async function call_deepseek(
     "Authorization": `Bearer ${DEEPSEEK_API_KEY}`,
   };
 
+  // Remove empty params
+  if (params?.stop !== undefined && (!Array.isArray(params.stop) || params.stop.length === 0))
+    delete params.stop;
+  if (params?.seed && params.seed.toString().length === 0) delete params?.seed;
+  if (params?.functions !== undefined && (!Array.isArray(params.functions) || params.functions.length === 0))
+    delete params?.functions;
+  if (params?.function_call !== undefined && (!(typeof params.function_call === "string") || params.function_call.trim().length === 0))
+    delete params.function_call;
+  if (params?.tools !== undefined && (!Array.isArray(params.tools) || params.tools.length === 0))
+    delete params?.tools;
+  if (params?.tool_choice !== undefined && (!(typeof params.tool_choice === "string") || params.tool_choice.trim().length === 0))
+    delete params.tool_choice;
+
+  // Extract chat history and system message if provided
+  const chat_history: ChatHistory | undefined = params?.chat_history;
+  const system_msg: string = params?.system_msg !== undefined ? params.system_msg : "You are a helpful assistant.";
+  delete params?.system_msg;
+  delete params?.chat_history;
+
   const query: Dict = {
     model: model.toString(),
-    messages: [{ role: "user", content: prompt }],
+    messages: construct_openai_chat_history(prompt, chat_history, system_msg),
     temperature,
     n,
     ...params,
   };
 
-  const response = await route_fetch(
-    "https://api.deepseek.com/v1/chat/completions",
-    "POST",
-    headers,
-    query,
-  );
+  console.log(`Querying DeepSeek model '${model}' with prompt '${prompt}'...`);
 
-  return [query, response];
+  try {
+    const response = await route_fetch(
+      "https://api.deepseek.com/v1/chat/completions",
+      "POST",
+      headers,
+      query,
+    );
+
+    if (!response.choices || !Array.isArray(response.choices)) {
+      throw new Error("Invalid response format from DeepSeek API");
+    }
+
+    return [query, response];
+  } catch (error: any) {
+    // Handle API-specific error messages if available
+    if (error.response?.data?.error) {
+      throw new Error(`DeepSeek API Error: ${error.response.data.error}`);
+    }
+    throw error;
+  }
 }
 
 function _extract_deepseek_responses(response: Dict): Array<string> {
-  return response.choices.map((choice: Dict) => choice.message.content);
+  if (!response.choices || !Array.isArray(response.choices)) {
+    return [];
+  }
+  return response.choices.map((choice: Dict) => {
+    // Handle function calls like OpenAI
+    if (choice.finish_reason === "function_call" || ("function_call" in choice.message && choice.message.function_call.length > 0)) {
+      const func = choice.message.function_call;
+      return "[[FUNCTION]] " + func.name + func.arguments.toString();
+    } else if (choice.finish_reason === "tool_calls" || ("tool_calls" in choice.message && choice.message.tool_calls.length > 0)) {
+      const tools = choice.message.tool_calls;
+      return "[[TOOLS]] " + tools.map((t: Dict) => t.function.name + " " + t.function.arguments).join("\n\n");
+    }
+    
+    if (!choice.message?.content) {
+      console.warn("Malformed response choice from DeepSeek API");
+      return "";
+    }
+    return choice.message.content;
+  });
 }
