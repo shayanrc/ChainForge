@@ -72,6 +72,7 @@ Now you can open the browser of your choice and open `http://127.0.0.1:8000`.
 - Microsoft Azure OpenAI Endpoints
 - [AlephAlpha](https://app.aleph-alpha.com/)
 - Foundation models via Amazon Bedrock on-demand inference, including Anthropic Claude 3
+- [Deepseek](https://platform.deepseek.com/) (Chat and Coder models)
 - ...and any other provider through [custom provider scripts](https://chainforge.ai/docs/custom_providers/)!
 
 # Example experiments
@@ -143,8 +144,8 @@ We provide ongoing releases of this tool in the hopes that others find it useful
 
 ChainForge is meant to be general-purpose, and is not developed for a specific API or LLM back-end. Our ultimate goal is integration into other tools for the systematic evaluation and auditing of LLMs. We hope to help others who are developing prompt-analysis flows in LLMs, or otherwise auditing LLM outputs. This project was inspired by own our use case, but also shares some comraderie with two related (closed-source) research projects, both led by [Sherry Wu](https://www.cs.cmu.edu/~sherryw/):
 
-- "PromptChainer: Chaining Large Language Model Prompts through Visual Programming" (Wu et al., CHI ’22 LBW) [Video](https://www.youtube.com/watch?v=p6MA8q19uo0)
-- "AI Chains: Transparent and Controllable Human-AI Interaction by Chaining Large Language Model Prompts" (Wu et al., CHI ’22)
+- "PromptChainer: Chaining Large Language Model Prompts through Visual Programming" (Wu et al., CHI '22 LBW) [Video](https://www.youtube.com/watch?v=p6MA8q19uo0)
+- "AI Chains: Transparent and Controllable Human-AI Interaction by Chaining Large Language Model Prompts" (Wu et al., CHI '22)
 
 Unlike these projects, we are focusing on supporting evaluation across prompts, prompt parameters, and models.
 
