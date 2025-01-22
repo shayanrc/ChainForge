@@ -2352,17 +2352,15 @@ const DeepSeekSettings: ModelSettingsDict = {
       shortname: {
         type: "string",
         title: "Nickname",
-        description: "Unique identifier to appear in ChainForge. Keep it short.",
+        description:
+          "Unique identifier to appear in ChainForge. Keep it short.",
         default: "DeepSeek",
       },
       model: {
         type: "string",
         title: "Model Version",
         description: "Select a DeepSeek model to query.",
-        enum: [
-          NativeLLM.Deepseek_Chat,
-          NativeLLM.Deepseek_Coder,
-        ],
+        enum: [NativeLLM.Deepseek_Chat, NativeLLM.Deepseek_Coder],
         default: NativeLLM.Deepseek_Chat,
       },
       temperature: {
@@ -2393,7 +2391,8 @@ const DeepSeekSettings: ModelSettingsDict = {
       presence_penalty: {
         type: "number",
         title: "presence_penalty",
-        description: "Penalizes new tokens based on whether they appear in the text so far.",
+        description:
+          "Penalizes new tokens based on whether they appear in the text so far.",
         default: 0,
         minimum: -2.0,
         maximum: 2.0,
@@ -2402,7 +2401,8 @@ const DeepSeekSettings: ModelSettingsDict = {
       frequency_penalty: {
         type: "number",
         title: "frequency_penalty",
-        description: "Penalizes new tokens based on their frequency in the text so far.",
+        description:
+          "Penalizes new tokens based on their frequency in the text so far.",
         default: 0,
         minimum: -2.0,
         maximum: 2.0,
@@ -2411,25 +2411,29 @@ const DeepSeekSettings: ModelSettingsDict = {
       stop: {
         type: "string",
         title: "Stop Sequences",
-        description: 'Sequences where the API will stop generating further tokens. Enclose stop sequences in double-quotes "" and use whitespace to separate them.',
+        description:
+          'Sequences where the API will stop generating further tokens. Enclose stop sequences in double-quotes "" and use whitespace to separate them.',
         default: "",
       },
       system_msg: {
         type: "string",
         title: "System Message",
-        description: "Optional system message to set the behavior of the assistant.",
+        description:
+          "Optional system message to set the behavior of the assistant.",
         default: "You are a helpful assistant.",
       },
       response_format: {
         type: "string",
         title: "Response Format",
-        description: "The format of the response. Use 'text' for regular responses, 'json_object' for JSON, or provide a JSON schema for structured output.",
+        description:
+          "The format of the response. Use 'text' for regular responses, 'json_object' for JSON, or provide a JSON schema for structured output.",
         default: "text",
       },
       seed: {
         type: "integer",
         title: "Random Seed",
-        description: "If specified, the system will make a best effort to sample deterministically.",
+        description:
+          "If specified, the system will make a best effort to sample deterministically.",
         default: 0,
       },
       tools: {
@@ -2437,7 +2441,7 @@ const DeepSeekSettings: ModelSettingsDict = {
         title: "Tools",
         description: "A JSON array of function definitions the model may call.",
         default: "[]",
-      }
+      },
     },
   },
   uiSchema: {
@@ -2452,7 +2456,8 @@ const DeepSeekSettings: ModelSettingsDict = {
       "ui:help": "Defaults to 0.7.",
     },
     stop: {
-      "ui:help": "Enter stop sequences enclosed in quotes, separated by spaces.",
+      "ui:help":
+        "Enter stop sequences enclosed in quotes, separated by spaces.",
       "ui:widget": "textarea",
     },
     system_msg: {
@@ -2460,12 +2465,13 @@ const DeepSeekSettings: ModelSettingsDict = {
       "ui:help": "Optional message to control the assistant's behavior.",
     },
     response_format: {
-      "ui:help": "Format can be 'text', 'json_object', or a JSON schema for structured output.",
+      "ui:help":
+        "Format can be 'text', 'json_object', or a JSON schema for structured output.",
     },
     tools: {
       "ui:help": "JSON array of function definitions the model may call.",
       "ui:widget": "textarea",
-    }
+    },
   },
   postprocessors: {
     stop: (str) => {
@@ -2490,8 +2496,8 @@ const DeepSeekSettings: ModelSettingsDict = {
         console.warn("Failed to parse tools JSON:", e);
         return [];
       }
-    }
-  }
+    },
+  },
 };
 
 // A lookup table indexed by base_model.

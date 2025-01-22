@@ -287,8 +287,8 @@ export const RATE_LIMIT_BY_MODEL: { [key in LLM]?: number } = {
   [NativeLLM.Bedrock_Mistral_Mixtral]: 400, // 400 RPM
   [NativeLLM.Bedrock_Mistral_Mistral_Large]: 400, // 400 RPM
   [NativeLLM.Bedrock_Mistral_Mistral]: 800, // 800 RPM
-  [NativeLLM.Deepseek_Chat]: 100,    // Conservative estimate
-  [NativeLLM.Deepseek_Coder]: 100,   // Conservative estimate
+  [NativeLLM.Deepseek_Chat]: 100, // Conservative estimate
+  [NativeLLM.Deepseek_Coder]: 100, // Conservative estimate
 };
 
 export const RATE_LIMIT_BY_PROVIDER: { [key in LLMProvider]?: number } = {

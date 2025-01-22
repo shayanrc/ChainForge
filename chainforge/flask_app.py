@@ -514,10 +514,16 @@ def makeFetchCall():
         ret.headers.add('Access-Control-Allow-Origin', '*')
         return ret
     else:
-        err_msg = "API request to Anthropic failed"
-        ret = response.json()
-        if "error" in ret and "message" in ret["error"]:
-            err_msg += ": " + ret["error"]["message"]
+        err_msg = "API request failed"
+        try:
+            ret = response.json()
+            if "error" in ret:
+                if isinstance(ret["error"], dict) and "message" in ret["error"]:
+                    err_msg = ret["error"]["message"]
+                elif isinstance(ret["error"], str):
+                    err_msg = ret["error"]
+        except:
+            err_msg = response.text
         return jsonify({'error': err_msg})
 
 
