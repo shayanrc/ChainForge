@@ -961,7 +961,10 @@ const VisNode: React.FC<VisNodeProps> = ({ data, id }) => {
     [plotDivRef],
   );
 
-  const [plotDimensions, setPlotDimensions] = useState({ width: 0, height: 300 });
+  const [plotDimensions, setPlotDimensions] = useState({
+    width: 0,
+    height: 300,
+  });
 
   // Handle resize observer setup and cleanup
   useEffect(() => {
@@ -969,10 +972,10 @@ const VisNode: React.FC<VisNodeProps> = ({ data, id }) => {
 
     const observer = new window.ResizeObserver(() => {
       if (!plotDivRef.current) return;
-      
+
       setPlotDimensions({
         width: plotDivRef.current.clientWidth,
-        height: Math.max(plotDivRef.current.clientHeight, 300)
+        height: Math.max(plotDivRef.current.clientHeight, 300),
       });
     });
 
@@ -1087,18 +1090,18 @@ const VisNode: React.FC<VisNodeProps> = ({ data, id }) => {
               ...plotlyLayout,
               autosize: false,
               width: plotDimensions.width,
-              height: plotDimensions.height
+              height: plotDimensions.height,
             }}
             useResizeHandler={false}
             className="plotly-vis"
             style={{
               display: plotlySpec && plotlySpec.length > 0 ? "block" : "none",
               width: "100%",
-              height: "100%"
+              height: "100%",
             }}
             config={{
               responsive: false,
-              displayModeBar: false
+              displayModeBar: false,
             }}
           />
         )}
